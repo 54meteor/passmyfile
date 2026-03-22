@@ -44,8 +44,21 @@ function formatSize(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2) + ' GB';
 }
 
+// 翻译传输状态
+function getStatusText(status: string): string {
+  switch (status) {
+    case 'Pending': return '待确认';
+    case 'Transferring': return '传输中';
+    case 'Completed': return '已完成';
+    case 'Failed': return '失败';
+    case 'Cancelled': return '已取消';
+    default: return status;
+  }
+}
+
 function App() {
   const [deviceName, setDeviceName] = useState('');
+  const [version] = useState('1.0.0-beta.3');
   const [localIp, setLocalIp] = useState('');
   const [localPort, setLocalPort] = useState(18766);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -245,13 +258,13 @@ function App() {
 
   // 接受文件（使用默认路径）
   const handleAcceptFile = async (reqId: string) => {
+    // 立即关闭弹窗
+    setShowReceiveModal(false);
+    setPendingRequests([]);
     try {
       console.log('Accepting file with ID:', reqId);
       await invoke('confirm_receive', { req_id: reqId, save_path: null });
       console.log('Confirm success');
-      setShowReceiveModal(false);
-      setPendingRequests([]);
-      alert('文件已接收');
     } catch (e) {
       console.error('Accept failed:', e);
       alert('接收失败：' + String(e));
@@ -267,12 +280,13 @@ function App() {
       });
       if (!path) return;
       
+      // 立即关闭弹窗
+      setShowReceiveModal(false);
+      setPendingRequests([]);
+      
       console.log('Accepting file with ID:', reqId, 'path:', path);
       await invoke('confirm_receive', { req_id: reqId, save_path: path });
       console.log('Confirm success');
-      setShowReceiveModal(false);
-      setPendingRequests([]);
-      alert('文件已接收');
     } catch (e) {
       console.error('Accept failed:', e);
       alert('接收失败：' + String(e));
@@ -296,7 +310,7 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>📡 隔空投送</h1>
+        <h1>📡 隔空投送 <span className="version">{version}</span></h1>
         <div className="device-info">
           <span>本机IP: <strong>{localIp}:{localPort}</strong></span>
           <input
@@ -404,18 +418,25 @@ function App() {
           )}
 
           <div className="transfer-list">
-            <h3>传输记录</h3>
+            <h3>传输进度</h3>
             {transfers.length === 0 ? (
-              <p className="hint">暂无传输记录</p>
+              <p className="hint">暂无传输</p>
             ) : (
               transfers.map((t) => (
-                <div key={t.id} className="transfer-item">
+                <div key={t.id} className={`transfer-item ${t.status === 'Transferring' ? 'transferring' : ''}`}>
                   <div className="transfer-info">
-                    <span className="transfer-name">{t.file_name}</span>
-                    <span className="transfer-status">{t.direction === 'Send' ? '→' : '←'} {t.status}</span>
+                    <span className="transfer-name">
+                      {t.direction === 'Send' ? '→' : '←'} {t.file_name}
+                    </span>
+                    <span className={`transfer-status ${t.status.toLowerCase()}`}>
+                      {getStatusText(t.status)}
+                    </span>
                   </div>
                   <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${t.progress}%` }}></div>
+                    <div 
+                      className={`progress-fill ${t.direction === 'Send' ? 'send' : 'receive'}`} 
+                      style={{ width: `${t.progress}%` }}
+                    ></div>
                   </div>
                   <div className="transfer-meta">
                     <span>{formatSize(t.transferred)} / {formatSize(t.file_size)}</span>

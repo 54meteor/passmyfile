@@ -318,10 +318,10 @@ impl TransferService {
         let file_name = conn.file_name.clone(); // 保存文件名用于最后的日志
         if conn.is_folder {
             // 接收文件夹
-            Self::receive_folder(&mut stream, save_dir, conn.file_name, task_id.clone(), conn.file_size, self.progress_tx.clone()).await?;
+            self.receive_folder(&mut stream, save_dir, conn.file_name, task_id.clone(), conn.file_size).await?;
         } else {
             // 接收单个文件
-            Self::receive_file(&mut stream, save_dir, conn.file_name, task_id.clone(), conn.file_size, self.progress_tx.clone()).await?;
+            self.receive_file(&mut stream, save_dir, conn.file_name, task_id.clone(), conn.file_size).await?;
         }
 
         // 更新任务状态
@@ -349,19 +349,18 @@ impl TransferService {
 
     /// 接收文件夹
     async fn receive_folder(
+        &self,
         stream: &mut TcpStream,
         save_dir: PathBuf,
         folder_name: String,
         task_id: String,
         total_size: u64,
-        progress_tx: broadcast::Sender<TransferProgress>,
     ) -> Result<()> {
         let folder_path = save_dir.join(&folder_name);
         std::fs::create_dir_all(&folder_path)?;
         
-        let mut total_received: u64 = 0;
-        
         // 读取文件列表: 每个文件一行 "FILE:{relative_path}:{size}"
+        let mut file_list: Vec<(String, u64)> = Vec::new();
         loop {
             let mut line_buf = Vec::new();
             let mut byte = [0u8; 1];
@@ -395,6 +394,14 @@ impl TransferService {
             let relative_path = parts[1].to_string();
             let file_size: u64 = parts[2].parse().unwrap_or(0);
             
+            file_list.push((relative_path, file_size));
+        }
+        
+        write_log(&format!("File list received: {} files", file_list.len()));
+        
+        // 遍历文件列表，接收每个文件的数据
+        let mut total_received: u64 = 0;
+        for (relative_path, file_size) in file_list {
             // 创建文件的父目录
             let file_path = folder_path.join(&relative_path);
             if let Some(parent) = file_path.parent() {
@@ -419,13 +426,14 @@ impl TransferService {
                 total_received += n as u64;
                 
                 let progress = (total_received as f32 / total_size as f32) * 100.0;
-                let _ = progress_tx.send(TransferProgress {
-                    task_id: task_id.clone(),
-                    transferred: total_received,
-                    progress,
-                    speed: 0,
-                    status: TransferStatus::Transferring,
-                });
+                // 更新任务进度
+                {
+                    let mut tasks = self.tasks.write().await;
+                    if let Some(task) = tasks.get_mut(&task_id) {
+                        task.transferred = total_received;
+                        task.progress = progress;
+                    }
+                }
             }
         }
         
@@ -435,12 +443,12 @@ impl TransferService {
 
     /// 接收单个文件
     async fn receive_file(
+        &self,
         stream: &mut TcpStream,
         save_dir: PathBuf,
         file_name: String,
         task_id: String,
         file_size: u64,
-        progress_tx: broadcast::Sender<TransferProgress>,
     ) -> Result<()> {
         let file_path = save_dir.join(&file_name);
         let mut file = File::create(&file_path)?;
@@ -462,13 +470,14 @@ impl TransferService {
             total_received += n as u64;
 
             let progress = (total_received as f32 / file_size as f32) * 100.0;
-            let _ = progress_tx.send(TransferProgress {
-                task_id: task_id.clone(),
-                transferred: total_received,
-                progress,
-                speed: 0,
-                status: TransferStatus::Transferring,
-            });
+            // 更新任务进度
+            {
+                let mut tasks = self.tasks.write().await;
+                if let Some(task) = tasks.get_mut(&task_id) {
+                    task.transferred = total_received;
+                    task.progress = progress;
+                }
+            }
         }
         
         write_log(&format!("File received: {} ({} bytes)", file_name, total_received));
@@ -538,14 +547,7 @@ impl TransferService {
             return Err(anyhow!("传输被拒绝"));
         }
         
-        // 发送文件列表
-        for file_info in &files {
-            let file_line = format!("FILE:{}:{}\n", file_info.relative_path, file_info.size);
-            stream.write_all(file_line.as_bytes()).await?;
-        }
-        stream.write_all(b"END\n").await?;
-        
-        // 等待接收方准备就绪
+        // 等待接收方用户确认 (READY)
         let mut ready_buf = vec![0u8; 1024];
         let n = stream.read(&mut ready_buf).await?;
         ready_buf.truncate(n);
@@ -553,6 +555,13 @@ impl TransferService {
         if &ready_buf != b"READY" {
             return Err(anyhow!("接收方未准备就绪"));
         }
+        
+        // 用户已确认，开始发送文件列表
+        for file_info in &files {
+            let file_line = format!("FILE:{}:{}\n", file_info.relative_path, file_info.size);
+            stream.write_all(file_line.as_bytes()).await?;
+        }
+        stream.write_all(b"END\n").await?;
         
         info!("Starting folder transfer: {} to {}:{}", folder_name, target_ip, target_port);
         
@@ -593,13 +602,14 @@ impl TransferService {
                 transferred += n as u64;
                 
                 let progress = (transferred as f32 / total_size as f32) * 100.0;
-                let _ = self.progress_tx.send(TransferProgress {
-                    task_id: task_id.clone(),
-                    transferred,
-                    progress,
-                    speed: 0,
-                    status: TransferStatus::Transferring,
-                });
+                // 更新任务进度
+                {
+                    let mut tasks = self.tasks.write().await;
+                    if let Some(task) = tasks.get_mut(&task_id) {
+                        task.transferred = transferred;
+                        task.progress = progress;
+                    }
+                }
             }
         }
         
@@ -612,14 +622,6 @@ impl TransferService {
                 task.status = TransferStatus::Completed;
             }
         }
-        
-        let _ = self.progress_tx.send(TransferProgress {
-            task_id: task_id.clone(),
-            transferred: total_size,
-            progress: 100.0,
-            speed: 0,
-            status: TransferStatus::Completed,
-        });
         
         info!("Folder sent: {} ({} bytes)", folder_name, transferred);
         
@@ -726,13 +728,14 @@ impl TransferService {
             transferred += n as u64;
 
             let progress = (transferred as f32 / file_size as f32) * 100.0;
-            let _ = self.progress_tx.send(TransferProgress {
-                task_id: task_id.clone(),
-                transferred,
-                progress,
-                speed: 0,
-                status: TransferStatus::Transferring,
-            });
+            // 更新任务进度
+            {
+                let mut tasks = self.tasks.write().await;
+                if let Some(task) = tasks.get_mut(&task_id) {
+                    task.transferred = transferred;
+                    task.progress = progress;
+                }
+            }
         }
 
         // 更新任务状态
@@ -744,14 +747,6 @@ impl TransferService {
                 task.status = TransferStatus::Completed;
             }
         }
-
-        let _ = self.progress_tx.send(TransferProgress {
-            task_id: task_id.clone(),
-            transferred: file_size,
-            progress: 100.0,
-            speed: 0,
-            status: TransferStatus::Completed,
-        });
 
         info!("File sent: {} ({} bytes)", file_name, transferred);
 
