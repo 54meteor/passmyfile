@@ -373,6 +373,15 @@ h3 {
   transform: scale(1.02);
 }
 
+.send-folder-btn {
+  margin-top: 12px;
+  background: #8b5cf6;
+}
+
+.send-folder-btn:hover {
+  background: #7c3aed;
+}
+
 /* Transfer List */
 .transfer-list {
   margin-top: 20px;

@@ -33,6 +33,25 @@ pub struct PendingFileRequest {
     pub file_name: String,    // 文件名
     pub file_size: u64,       // 文件大小
     pub sender_ip: String,    // 发送方IP
+    pub is_folder: bool,     // 是否是文件夹
+    pub file_count: u32,      // 文件数量（文件夹时有效）
+    pub total_size: u64,      // 总大小（文件夹时有效）
+}
+
+/// 文件夹传输元信息
+#[derive(Debug, Clone)]
+pub struct FolderTransferMeta {
+    pub folder_name: String,
+    pub total_files: u32,
+    pub total_size: u64,
+    pub files: Vec<FolderFileInfo>,
+}
+
+/// 文件夹内的文件信息
+#[derive(Debug, Clone)]
+pub struct FolderFileInfo {
+    pub relative_path: String,  // 相对于文件夹的路径
+    pub size: u64,               // 文件大小
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

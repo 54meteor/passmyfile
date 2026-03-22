@@ -31,6 +31,9 @@ interface PendingRequest {
   file_name: string;
   file_size: number;
   sender_ip: string;
+  is_folder: boolean;
+  file_count: number;
+  total_size: number;
 }
 
 // 格式化文件大小
@@ -215,6 +218,31 @@ function App() {
     }
   };
 
+  // 发送文件夹
+  const handleSendFolder = async () => {
+    if (!selectedDevice) return;
+    
+    try {
+      // 使用 Tauri 文件对话框选择文件夹
+      const folderPath = await open({
+        directory: true,
+        title: '选择要发送的文件夹'
+      });
+      
+      if (!folderPath) return; // 用户取消了
+      
+      await invoke('send_file', {
+        targetIp: selectedDevice.ip,
+        targetPort: selectedDevice.port,
+        filePath: folderPath
+      });
+      alert(`文件夹已发送给 ${selectedDevice.name}`);
+    } catch (e) {
+      console.error('Send failed:', e);
+      alert('发送失败：' + e);
+    }
+  };
+
   // 接受文件（使用默认路径）
   const handleAcceptFile = async (reqId: string) => {
     try {
@@ -360,7 +388,13 @@ function App() {
                 className="send-btn"
                 onClick={handleSendFile}
               >
-                📁 选择文件发送
+                📄 选择文件发送
+              </button>
+              <button 
+                className="send-btn send-folder-btn"
+                onClick={handleSendFolder}
+              >
+                📂 选择文件夹发送
               </button>
             </div>
           ) : (
@@ -398,10 +432,17 @@ function App() {
       {showReceiveModal && pendingRequests.length > 0 && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>📥 收到文件</h2>
+            <h2>📥 收到{pendingRequests[0].is_folder ? '文件夹' : '文件'}</h2>
             <div className="file-info">
-              <p><strong>文件名：</strong>{pendingRequests[0].file_name}</p>
-              <p><strong>大小：</strong>{(pendingRequests[0].file_size / 1024 / 1024).toFixed(2)} MB</p>
+              <p><strong>名称：</strong>{pendingRequests[0].file_name}</p>
+              {pendingRequests[0].is_folder ? (
+                <>
+                  <p><strong>文件数：</strong>{pendingRequests[0].file_count} 个文件</p>
+                  <p><strong>总大小：</strong>{formatSize(pendingRequests[0].total_size)}</p>
+                </>
+              ) : (
+                <p><strong>大小：</strong>{formatSize(pendingRequests[0].file_size)}</p>
+              )}
               <p><strong>来自：</strong>{pendingRequests[0].sender_ip}</p>
             </div>
             <div className="modal-buttons">
