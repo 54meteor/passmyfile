@@ -29,6 +29,7 @@ fn sanitize_path_component(name: &str) -> String {
 
 /// 过滤并规范化相对路径，移除 .. 和 . 组件，验证不超出 base
 fn sanitize_rel_path(rel_path: &str, base: &std::path::Path) -> Result<std::path::PathBuf, String> {
+    // 使用 components() 正确解析路径，跳过 Prefix(C:) 这种 Windows 盘符前缀
     let mut result = std::path::PathBuf::new();
     for comp in std::path::Path::new(rel_path).components() {
         match comp {
@@ -36,17 +37,24 @@ fn sanitize_rel_path(rel_path: &str, base: &std::path::Path) -> Result<std::path
                 result.pop();
             }
             std::path::Component::CurDir => {}
+            // Normal 可能是普通文件名，也可能是裸盘符如 "D:"（Windows 上 components() 会把 "D:" 解析为 Prefix + Relative）
             std::path::Component::Normal(name) => {
+                let n = name.to_string_lossy();
+                // 裸盘符如 "D:" 跳过（会导致 join 行为异常）
+                if n.len() == 2 && n.chars().nth(1) == Some(':') {
+                    continue;
+                }
                 result.push(name);
             }
-            _ => {
-                return Err(format!("非法路径组件: {:?}", comp));
+            // 跳过 Prefix（如 Windows 盘符前缀 C:) 和 RootDir
+            std::path::Component::Prefix(_) | std::path::Component::RootDir => {
+                continue;
             }
         }
     }
     let full = base.join(&result);
-    // 验证不超出 base（路径遍历后仍在 base 内）
-    let full_canon = full.canonicalize().unwrap_or(full);
+    // 验证最终路径不超出 base
+    let full_canon = full.canonicalize().unwrap_or(full.clone());
     let base_canon = base.canonicalize().unwrap_or_else(|_| base.to_path_buf());
     if !full_canon.starts_with(&base_canon) {
         return Err(format!("路径遍历被拒绝: {:?}", result));
