@@ -380,12 +380,83 @@ h3 {
 }
 
 .send-folder-btn {
-  margin-top: 12px;
   background: #8b5cf6;
 }
 
 .send-folder-btn:hover {
   background: #7c3aed;
+}
+
+.access-shared-btn {
+  background: #10b981;
+  margin-left: 8px;
+}
+
+.access-shared-btn:hover {
+  background: #059669;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Shared Browser (integrated in device tab) */
+.shared-browser {
+  margin-top: 20px;
+  background: #16213e;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.shared-browser h3 {
+  color: #e2e8f0;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.shared-dir-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shared-dir-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #1a2a4a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.shared-dir-item:hover {
+  background: #243554;
+}
+
+.shared-dir-item .dir-icon {
+  font-size: 24px;
+}
+
+.shared-dir-item .dir-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shared-dir-item .dir-name {
+  color: #e2e8f0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.shared-dir-item .dir-path {
+  color: #64748b;
+  font-size: 12px;
 }
 
 /* Transfer List */
@@ -477,4 +548,510 @@ h3 {
 .hint {
   font-size: 13px;
   color: #666;
+}
+
+/* ============ Tab Navigation ============ */
+.tab-nav {
+  display: flex;
+  background: #16213e;
+  border-bottom: 1px solid #0f3460;
+  padding: 0 24px;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  background: transparent;
+  color: #a0a0a0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  color: #fff;
+}
+
+.tab-btn.active {
+  color: #e94560;
+  border-bottom-color: #e94560;
+}
+
+/* ============ Share Section ============ */
+.share-section {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.share-toggle-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #16213e;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.share-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.share-toggle-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.share-toggle-status {
+  font-size: 13px;
+  color: #a0a0a0;
+}
+
+.share-toggle-status.active {
+  color: #4ade80;
+}
+
+.toggle-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn.start {
+  background: #4ade80;
+  color: #000;
+}
+
+.toggle-btn.start:hover {
+  background: #22c55e;
+}
+
+.toggle-btn.stop {
+  background: #ef4444;
+  color: #fff;
+}
+
+.toggle-btn.stop:hover {
+  background: #dc2626;
+}
+
+.share-dir-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.share-dir-header h3 {
+  color: #fff;
+  font-size: 16px;
+}
+
+.add-share-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-share-btn:hover {
+  background: #2563eb;
+}
+
+.share-dir-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.share-dir-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #16213e;
+  border-radius: 10px;
+  gap: 12px;
+}
+
+.share-dir-icon {
+  font-size: 28px;
+}
+
+.share-dir-info {
+  flex: 1;
+}
+
+.share-dir-name {
+  font-size: 15px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.share-dir-path {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.remove-share-btn {
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.remove-share-btn:hover {
+  opacity: 1;
+}
+
+.share-info-panel {
+  margin-top: 24px;
+  background: #16213e;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.share-info-panel h3 {
+  color: #fff;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.share-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.share-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #fff;
+}
+
+/* ============ Download Section ============ */
+.download-section {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.discover-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+
+.discover-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.discover-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.download-dir-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #16213e;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.download-dir-label {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.download-dir-path {
+  flex: 1;
+  color: #e2e8f0;
+  font-size: 13px;
+  word-break: break-all;
+}
+
+.download-dir-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: #475569;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.download-dir-btn:hover {
+  background: #64748b;
+}
+
+.active-downloads {
+  margin-bottom: 20px;
+}
+
+.active-downloads h3 {
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.download-item {
+  background: #16213e;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+}
+
+.host-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.host-card {
+  background: #16213e;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.host-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.host-header:hover,
+.host-header.expanded {
+  background: #1f2b47;
+}
+
+.host-expand-icon {
+  font-size: 10px;
+  color: #666;
+  width: 14px;
+}
+
+.host-icon {
+  font-size: 24px;
+}
+
+.host-info {
+  flex: 1;
+}
+
+.host-name {
+  display: block;
+  font-size: 15px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.host-meta {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.host-dirs {
+  border-top: 1px solid #0f3460;
+}
+
+.host-dir-item {
+  border-bottom: 1px solid #0f3460;
+}
+
+.host-dir-item:last-child {
+  border-bottom: none;
+}
+
+.dir-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px 10px 36px;
+  cursor: pointer;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.dir-row:hover,
+.dir-row.active {
+  background: #1a1a2e;
+}
+
+.dir-expand-icon {
+  font-size: 10px;
+  color: #666;
+  width: 14px;
+}
+
+.dir-icon {
+  font-size: 16px;
+}
+
+.dir-name {
+  font-size: 14px;
+  color: #fff;
+  min-width: 120px;
+}
+
+.dir-path {
+  font-size: 12px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* File Browser */
+.file-browser {
+  padding: 0 16px 12px 50px;
+  background: #1a1a2e;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #0f3460;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #16213e;
+  color: #a0a0a0;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: #1f2b47;
+  color: #fff;
+}
+
+.breadcrumb-path {
+  font-size: 13px;
+  color: #a0a0a0;
+}
+
+.breadcrumb-item {
+  color: #fff;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.file-row:hover {
+  background: #16213e;
+}
+
+.file-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 14px;
+  color: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-row .file-name:hover {
+  color: #e94560;
+}
+
+.file-size {
+  font-size: 13px;
+  color: #666;
+  width: 80px;
+  text-align: right;
+}
+
+.file-modified {
+  font-size: 12px;
+  color: #666;
+  width: 140px;
+  text-align: right;
+}
+
+.file-download-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #4ade80;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.file-download-btn:hover {
+  background: #22c55e;
+}
+
+.empty-dir {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
 }

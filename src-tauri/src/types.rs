@@ -1,4 +1,49 @@
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
+
+/// ============ 共享目录相关类型 ============
+
+/// 共享目录
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SharedDir {
+    pub id: String,       // 目录唯一ID
+    pub name: String,    // 显示名称
+    pub path: String,    // 实际路径（序列化用 String）
+}
+
+/// 主机信息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HostInfo {
+    pub id: String,
+    pub name: String,
+    pub ip: String,
+    pub port: u16,
+    pub shared_dirs: Vec<SharedDir>,
+}
+
+/// UDP 发现消息
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiscoveryMessage {
+    #[serde(rename = "type")]
+    pub msg_type: String,         // "announce" 或 "who-is-host"
+    pub id: String,                 // 设备ID
+    pub name: String,               // 设备名称
+    pub port: u16,                  // TCP 文件传输端口
+    #[serde(default)]
+    pub shared_dirs: Vec<SharedDir>, // 共享目录（announce 消息携带）
+}
+
+/// 文件条目（用于目录浏览）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileEntry {
+    pub name: String,     // 文件/目录名称
+    pub path: String,      // 相对于共享目录根的路径
+    pub is_dir: bool,     // 是否是目录
+    pub size: u64,         // 文件大小（目录时为0）
+    pub modified: Option<u64>, // 修改时间戳（秒）
+}
+
+/// ============ 原有类型 ============
 
 /// 设备信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
